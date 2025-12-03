@@ -6,6 +6,10 @@ const Navbar = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
 
+    // Debug logging
+    console.log('Navbar user:', user);
+    console.log('Navbar isAdmin():', isAdmin());
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -27,7 +31,7 @@ const Navbar = () => {
               <Link to="/create" className="nav-link">Sell Item</Link>
               <Link to="/my-listings" className="nav-link">My Listings</Link>
               
-              {(isAdmin() || (user?.role || user?.user_role)?.toLowerCase() === 'admin') && (
+                {isAdmin() && (
                 <Link to="/admin" className="nav-link admin-link">Admin</Link>
               )}
               

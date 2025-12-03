@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-// Backend URL - change this if your Railway URL is different
-const API_BASE_URL = 'https://postgres-production-979f4.up.railway.app/api';
+// Backend URL
+// Prefer Vite env var when present (e.g., on Vercel), fallback to Railway URL for local/dev.
+const API_BASE_URL =
+  import.meta?.env?.VITE_API_BASE_URL || 'https://mycampusswap-production.up.railway.app/api';
 
 // Create axios instance with default config
 const api = axios.create({

@@ -2,6 +2,27 @@
 
 Peer-to-peer campus marketplace for York University students to list, browse, and request items (textbooks, electronics, furniture, etc.). Built as a learning project following MVC, DAO, and clean separation of front-end and back-end.
 
+## Frontend Deploy (Vercel UI)
+
+1) Push your latest code to GitHub.
+
+2) In Vercel UI: New Project → Import Git Repository.
+
+3) Framework Preset: select "Vite".
+
+4) Build settings:
+	- Build Command: `npm run build`
+	- Output Directory: `dist`
+
+5) Environment Variables (add to both Production and Preview):
+	- `VITE_API_BASE_URL` = `https://mycampusswap-production.up.railway.app/api`
+
+6) Deploy. After build finishes, open the Vercel URL and test routes like `/login`, `/browse`, `/admin`.
+
+Notes:
+- Client-side routes are handled automatically by Vercel's Vite preset.
+- API requests use the `VITE_API_BASE_URL` you set; no additional proxy config is required.
+
 ## Monorepo Structure
 
 ```
@@ -21,6 +42,14 @@ mycampusswap/
 - Back-end: Node.js + Express + PostgreSQL (DAO pattern)
 - Auth: Email/password (York verification constraint planned)
 - Deployment Targets: Vercel (frontend) + Railway/Render (backend + Postgres)
+
+## Environment Variables
+
+Frontend (at repo root `.env` or Vercel Project Settings → Environment Variables):
+
+```
+VITE_API_BASE_URL=https://mycampusswap-production.up.railway.app/api
+```
 
 ## Getting Started (Backend)
 

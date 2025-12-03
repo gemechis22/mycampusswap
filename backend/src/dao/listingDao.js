@@ -14,18 +14,34 @@ export async function findListingById(id) {
 }
 
 export async function findListingsByStatus(status) {
-  const { rows } = await query('SELECT * FROM listing WHERE status = $1 ORDER BY created_at DESC', [status]);
+  const text = `SELECT 
+    l.*,
+    u.display_name AS seller_name,
+    c.name AS category_name
+  FROM listing l
+  LEFT JOIN app_user u ON l.seller_id = u.id
+  LEFT JOIN category c ON l.category_id = c.id
+  WHERE l.status = $1 
+  ORDER BY l.created_at DESC`;
+  const { rows } = await query(text, [status]);
   return rows;
 }
 
 export async function findActiveListings({ category_id, limit = 50, offset = 0 }) {
-  let text = 'SELECT * FROM listing WHERE status = $1';
+  let text = `SELECT 
+    l.*,
+    u.display_name AS seller_name,
+    c.name AS category_name
+  FROM listing l
+  LEFT JOIN app_user u ON l.seller_id = u.id
+  LEFT JOIN category c ON l.category_id = c.id
+  WHERE l.status = $1`;
   const values = ['active'];
   if (category_id) {
-    text += ' AND category_id = $2';
+    text += ' AND l.category_id = $2';
     values.push(category_id);
   }
-  text += ' ORDER BY created_at DESC LIMIT $' + (values.length + 1) + ' OFFSET $' + (values.length + 2);
+  text += ' ORDER BY l.created_at DESC LIMIT $' + (values.length + 1) + ' OFFSET $' + (values.length + 2);
   values.push(limit, offset);
   const { rows } = await query(text, values);
   return rows;
@@ -38,6 +54,13 @@ export async function updateListingStatus(id, status) {
 }
 
 export async function findListingsBySeller(seller_id) {
-  const { rows } = await query('SELECT * FROM listing WHERE seller_id = $1 ORDER BY created_at DESC', [seller_id]);
+  const text = `SELECT 
+    l.*,
+    c.name AS category_name
+  FROM listing l
+  LEFT JOIN category c ON l.category_id = c.id
+  WHERE l.seller_id = $1 
+  ORDER BY l.created_at DESC`;
+  const { rows } = await query(text, [seller_id]);
   return rows;
 }
