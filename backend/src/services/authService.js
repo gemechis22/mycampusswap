@@ -8,7 +8,9 @@ function getJwtSecret() {
   return process.env.JWT_SECRET || 'dev-insecure-secret-change-in-prod';
 }
 
-export async function register({ email, displayName, password }) {
+const ALLOWED_ROLES = ['student', 'admin'];
+
+export async function register({ email, displayName, password, role = 'student' }) {
   // Basic validation
   if (!email || !displayName || !password) {
     throw new Error('Missing required fields');
@@ -17,9 +19,12 @@ export async function register({ email, displayName, password }) {
   if (existing) {
     throw new Error('Email already registered');
   }
+  // Normalize and validate role
+  const normalizedRole = (role || 'student').toString().toLowerCase();
+  const finalRole = ALLOWED_ROLES.includes(normalizedRole) ? normalizedRole : 'student';
   // (Optional) enforce York domain later: email.endsWith('@yorku.ca')
   const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
-  const user = await createUser({ university_email: email, display_name: displayName, password_hash });
+  const user = await createUser({ university_email: email, display_name: displayName, password_hash, role: finalRole });
   return user;
 }
 
