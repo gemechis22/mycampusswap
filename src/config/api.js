@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Backend URL - change this if your Railway URL is different
-const API_BASE_URL = 'https://mycampusswap-production.up.railway.app/api';
+const API_BASE_URL = 'https://postgres-production-979f4.up.railway.app/api';
 
 // Create axios instance with default config
 const api = axios.create({
