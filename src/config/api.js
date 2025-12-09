@@ -51,4 +51,21 @@ export const listingsAPI = {
   reject: (id) => api.post(`/listings/${id}/reject`),
 };
 
+export const buyRequestsAPI = {
+  // Student - create a buy request for a listing (requires auth)
+  create: (listing_id) => api.post('/buy-requests', { listing_id }),
+  
+  // Seller - get pending buy requests received (requires auth)
+  getIncoming: () => api.get('/buy-requests/incoming'),
+  
+  // Buyer - get all buy requests made by user (requires auth)
+  getMy: () => api.get('/buy-requests/my'),
+  
+  // Seller - accept a buy request (requires auth)
+  accept: (id) => api.post(`/buy-requests/${id}/accept`),
+  
+  // Seller - reject a buy request (requires auth)
+  reject: (id) => api.post(`/buy-requests/${id}/reject`),
+};
+
 export default api;

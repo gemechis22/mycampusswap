@@ -1,0 +1,150 @@
+.requests-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.requests-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.requests-header h1 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.requests-header p {
+  font-size: 16px;
+  color: #666;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-banner {
+  background: #fee;
+  color: #c33;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-top: 40px;
+}
+
+.empty-state h2 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 16px;
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.request-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.request-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 15px;
+}
+
+.request-header h3 {
+  font-size: 20px;
+  color: #333;
+  margin: 0;
+}
+
+.request-price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #E31837; /* York red */
+}
+
+.request-details {
+  margin-bottom: 20px;
+}
+
+.request-details p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.request-details strong {
+  color: #333;
+}
+
+.request-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.btn-accept,
+.btn-reject {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-accept {
+  background: #2ecc71;
+  color: white;
+}
+
+.btn-accept:hover:not(:disabled) {
+  background: #27ae60;
+}
+
+.btn-accept:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}
+
+.btn-reject {
+  background: #e74c3c;
+  color: white;
+}
+
+.btn-reject:hover:not(:disabled) {
+  background: #c0392b;
+}
+
+.btn-reject:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+}

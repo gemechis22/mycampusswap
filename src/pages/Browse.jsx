@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { listingsAPI } from '../config/api';
+import { listingsAPI, buyRequestsAPI } from '../config/api';
 import { useAuth } from '../context/AuthContext';
 import './Browse.css';
 
@@ -7,7 +7,9 @@ const Browse = () => {
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { isAuthenticated } = useAuth();
+  const [requestingListingId, setRequestingListingId] = useState(null);
+  const [requestSuccess, setRequestSuccess] = useState('');
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     loadListings();
@@ -27,6 +29,32 @@ const Browse = () => {
     }
   };
 
+  const handleRequestToBuy = async (listing_id, seller_id) => {
+    if (!isAuthenticated) {
+      setError('Please log in to make a request');
+      return;
+    }
+
+    if (user.id === seller_id) {
+      setError('Cannot request to buy your own listing');
+      return;
+    }
+
+    setRequestingListingId(listing_id);
+    try {
+      await buyRequestsAPI.create(listing_id);
+      setRequestSuccess(`Request sent! The seller will respond soon.`);
+      setError('');
+      // Clear success message after 3 seconds
+      setTimeout(() => setRequestSuccess(''), 3000);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send request. Please try again.');
+      console.error(err);
+    } finally {
+      setRequestingListingId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="browse-container">
@@ -43,6 +71,7 @@ const Browse = () => {
       </div>
 
       {error && <div className="error-banner">{error}</div>}
+      {requestSuccess && <div className="success-banner">{requestSuccess}</div>}
 
       {listings.length === 0 ? (
         <div className="empty-state">
@@ -73,19 +102,25 @@ const Browse = () => {
                     ${((listing.price_cents || 0) / 100).toFixed(2)}
                   </span>
                   <span className="listing-seller">
-                    by {listing.seller_name || 'Anonymous'}
+                    by {listing.seller_name || listing.display_name || 'Anonymous'}
                   </span>
                 </div>
                 
                 <div className="listing-meta">
-                  <span className="listing-category">{listing.category_name}</span>
+                  <span className="listing-category">{listing.category_name || 'Uncategorized'}</span>
                   <span className="listing-date">
                     {new Date(listing.created_at).toLocaleDateString()}
                   </span>
                 </div>
 
-                {isAuthenticated && (
-                  <button className="btn-contact">Contact Seller</button>
+                {isAuthenticated && user.id !== listing.seller_id && (
+                  <button 
+                    className="btn-contact"
+                    onClick={() => handleRequestToBuy(listing.id, listing.seller_id)}
+                    disabled={requestingListingId === listing.id}
+                  >
+                    {requestingListingId === listing.id ? 'Sending...' : 'Request to Buy'}
+                  </button>
                 )}
               </div>
             </div>

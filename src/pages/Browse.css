@@ -36,6 +36,16 @@
   text-align: center;
 }
 
+.success-banner {
+  background: #efe;
+  color: #3c3;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  text-align: center;
+  border-left: 4px solid #3c3;
+}
+
 .empty-state {
   text-align: center;
   padding: 80px 20px;
