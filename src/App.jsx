@@ -7,6 +7,7 @@ import Browse from './pages/Browse';
 import CreateListing from './pages/CreateListing';
 import MyListings from './pages/MyListings';
 import AdminDashboard from './pages/AdminDashboard';
+import IncomingRequests from './pages/IncomingRequests';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/create" element={<CreateListing />} />
             <Route path="/my-listings" element={<MyListings />} />
+            <Route path="/incoming-requests" element={<IncomingRequests />} />
             <Route path="/admin" element={<AdminDashboard />} />
           </Routes>
         </div>

@@ -30,6 +30,7 @@ const Navbar = () => {
             <>
               <Link to="/create" className="nav-link">Sell Item</Link>
               <Link to="/my-listings" className="nav-link">My Listings</Link>
+              <Link to="/incoming-requests" className="nav-link">Incoming Requests</Link>
               
                 {isAdmin() && (
                 <Link to="/admin" className="nav-link admin-link">Admin</Link>
