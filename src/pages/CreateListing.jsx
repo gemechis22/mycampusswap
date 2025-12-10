@@ -10,14 +10,15 @@ const CreateListing = () => {
   const [price, setPrice] = useState('');
   const [categoryId, setCategoryId] = useState('1');
   const [condition, setCondition] = useState('good');
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  
+  const MAX_IMAGES = 5;
 
   // Categories from your database seed
   const categories = [
@@ -54,7 +55,7 @@ const CreateListing = () => {
     }
 
     try {
-      // Use FormData to send file + other data
+      // Use FormData to send files + other data
       const formData = new FormData();
       formData.append('title', title);
       formData.append('description', description);
@@ -63,9 +64,10 @@ const CreateListing = () => {
       formData.append('condition', condition);
       formData.append('quantity', 1);
       
-      if (image) {
-        formData.append('image', image);
-      }
+      // Add all images
+      images.forEach((imgObj) => {
+        formData.append('images', imgObj.file);
+      });
 
       // Create listing with FormData
       await listingsAPI.create(formData);
@@ -78,8 +80,7 @@ const CreateListing = () => {
       setPrice('');
       setCategoryId('1');
       setCondition('good');
-      setImage(null);
-      setImagePreview(null);
+      setImages([]);
 
       // Redirect after 2 seconds
       setTimeout(() => {
@@ -93,23 +94,42 @@ const CreateListing = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files || []);
+    
+    // Check total count
+    if (images.length + files.length > MAX_IMAGES) {
+      setError(`You can only upload up to ${MAX_IMAGES} images`);
+      return;
+    }
+
+    const newImages = [];
+    for (const file of files) {
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image must be less than 5MB');
+        setError('Each image must be less than 5MB');
         return;
       }
-      setImage(file);
       
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        newImages.push({
+          file,
+          preview: reader.result,
+          id: Date.now() + Math.random()
+        });
+        
+        if (newImages.length === files.length) {
+          setImages([...images, ...newImages]);
+          setError('');
+        }
       };
       reader.readAsDataURL(file);
-      setError('');
     }
+  };
+
+  const removeImage = (id) => {
+    setImages(images.filter(img => img.id !== id));
   };
 
   // Show loading while checking auth
@@ -191,29 +211,38 @@ const CreateListing = () => {
           </div>
 
           <div className="form-group">
-            <label>Image</label>
-            {imagePreview && (
-              <div className="image-preview">
-                <img src={imagePreview} alt="Preview" />
-                <button 
-                  type="button" 
-                  className="btn-remove-image"
-                  onClick={() => {
-                    setImage(null);
-                    setImagePreview(null);
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
+            <label>Images (up to {MAX_IMAGES})</label>
+            <div className="images-gallery">
+              {images.map((imgObj) => (
+                <div key={imgObj.id} className="image-thumbnail">
+                  <img src={imgObj.preview} alt="Preview" />
+                  <button 
+                    type="button" 
+                    className="btn-remove-thumbnail"
+                    onClick={() => removeImage(imgObj.id)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+            {images.length < MAX_IMAGES && (
+              <>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageChange}
+                  disabled={loading}
+                />
+                <small>
+                  You can upload {MAX_IMAGES - images.length} more images. Max 5MB each.
+                </small>
+              </>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={loading}
-            />
-            <small>Max file size: 5MB. Supported: JPG, PNG, GIF</small>
+            {images.length === MAX_IMAGES && (
+              <small className="max-reached">Maximum {MAX_IMAGES} images reached</small>
+            )}
           </div>
 
           <div className="form-group">

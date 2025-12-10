@@ -5,13 +5,21 @@ export async function createListing(req, res) {
     const { category_id, title, description, price_cents, condition, quantity } = req.body;
     const seller_id = req.user.id;
     
-    // Handle image upload if provided
+    // Handle image uploads if provided (up to 5)
     let image_url = null;
-    if (req.file) {
-      // Convert buffer to base64 and create data URL for now
-      // In production, use cloud storage like S3, Cloudinary, etc.
-      const base64 = req.file.buffer.toString('base64');
-      image_url = `data:${req.file.mimetype};base64,${base64}`;
+    let images = [];
+    
+    if (req.files && req.files.length > 0) {
+      // Convert files to base64
+      images = req.files.slice(0, 5).map((file) => {
+        const base64 = file.buffer.toString('base64');
+        return `data:${file.mimetype};base64,${base64}`;
+      });
+      
+      // First image is the primary image_url
+      if (images.length > 0) {
+        image_url = images[0];
+      }
     }
     
     const listing = await listingService.createListingForStudent({ 
@@ -22,7 +30,8 @@ export async function createListing(req, res) {
       price_cents, 
       condition, 
       quantity,
-      image_url
+      image_url,
+      images
     });
     res.status(201).json({ listing });
   } catch (err) {

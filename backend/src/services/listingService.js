@@ -1,23 +1,60 @@
 import * as listingDao from '../dao/listingDao.js';
 
-export async function createListingForStudent({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url }) {
+export async function createListingForStudent({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url, images }) {
   if (!title || price_cents == null || price_cents < 0) {
     throw new Error('Invalid listing data');
   }
   const listing = await listingDao.createListing({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url });
-  return listing;
+  
+  // Add additional images if provided (up to 5 total)
+  if (images && images.length > 0) {
+    const imagesToAdd = images.slice(0, 5).map((img, idx) => ({
+      data_url: img,
+      display_order: idx + 1
+    }));
+    await listingDao.addListingImages(listing.id, imagesToAdd);
+  }
+  
+  // Fetch images and attach to listing
+  const listingImages = await listingDao.getListingImages(listing.id);
+  return { ...listing, images: listingImages };
 }
 
 export async function getListingById(id) {
-  return await listingDao.findListingById(id);
+  const listing = await listingDao.findListingById(id);
+  if (listing) {
+    const images = await listingDao.getListingImages(id);
+    return { ...listing, images };
+  }
+  return listing;
 }
 
 export async function getActiveListings({ search, category_id, price_min_cents, price_max_cents, condition, limit, offset }) {
-  return await listingDao.findActiveListings({ search, category_id, price_min_cents, price_max_cents, condition, limit, offset });
+  const listings = await listingDao.findActiveListings({ search, category_id, price_min_cents, price_max_cents, condition, limit, offset });
+  
+  // Fetch images for each listing
+  const listingsWithImages = await Promise.all(
+    listings.map(async (listing) => {
+      const images = await listingDao.getListingImages(listing.id);
+      return { ...listing, images };
+    })
+  );
+  
+  return listingsWithImages;
 }
 
 export async function getPendingListings() {
-  return await listingDao.findListingsByStatus('pending');
+  const listings = await listingDao.findListingsByStatus('pending');
+  
+  // Fetch images for each listing
+  const listingsWithImages = await Promise.all(
+    listings.map(async (listing) => {
+      const images = await listingDao.getListingImages(listing.id);
+      return { ...listing, images };
+    })
+  );
+  
+  return listingsWithImages;
 }
 
 export async function approveListingById(id) {

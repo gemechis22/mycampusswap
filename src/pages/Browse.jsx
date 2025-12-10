@@ -262,10 +262,15 @@ const Browse = () => {
           {listings.map((listing) => (
             <div key={listing.id} className="listing-card">
               <div className="listing-image">
-                {listing.image_url ? (
+                {listing.images && listing.images.length > 0 ? (
+                  <img src={listing.images[0].image_data} alt={listing.title} />
+                ) : listing.image_url ? (
                   <img src={listing.image_url} alt={listing.title} />
                 ) : (
                   <div className="placeholder-image">📦</div>
+                )}
+                {listing.images && listing.images.length > 1 && (
+                  <div className="image-count-badge">{listing.images.length} photos</div>
                 )}
               </div>
               

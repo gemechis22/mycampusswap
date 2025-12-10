@@ -8,6 +8,31 @@ export async function createListing({ seller_id, category_id, title, description
   return rows[0];
 }
 
+export async function addListingImages(listing_id, images) {
+  // images = [{ data_url, display_order }, ...]
+  if (!images || images.length === 0) return;
+  
+  for (let i = 0; i < images.length; i++) {
+    const text = `INSERT INTO listing_image (listing_id, image_data, display_order)
+                  VALUES ($1, $2, $3)`;
+    const values = [listing_id, images[i].data_url, images[i].display_order || (i + 1)];
+    await query(text, values);
+  }
+}
+
+export async function getListingImages(listing_id) {
+  const text = `SELECT id, image_data, display_order FROM listing_image 
+                WHERE listing_id = $1 
+                ORDER BY display_order ASC`;
+  const { rows } = await query(text, [listing_id]);
+  return rows;
+}
+
+export async function deleteListingImage(image_id) {
+  const text = `DELETE FROM listing_image WHERE id = $1`;
+  await query(text, [image_id]);
+}
+
 export async function findListingById(id) {
   const { rows } = await query('SELECT * FROM listing WHERE id = $1', [id]);
   return rows[0] || null;
