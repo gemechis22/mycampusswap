@@ -12,8 +12,8 @@ export async function getListingById(id) {
   return await listingDao.findListingById(id);
 }
 
-export async function getActiveListings({ category_id, limit, offset }) {
-  return await listingDao.findActiveListings({ category_id, limit, offset });
+export async function getActiveListings({ search, category_id, price_min_cents, price_max_cents, condition, limit, offset }) {
+  return await listingDao.findActiveListings({ search, category_id, price_min_cents, price_max_cents, condition, limit, offset });
 }
 
 export async function getPendingListings() {

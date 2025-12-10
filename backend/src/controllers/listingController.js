@@ -13,9 +13,13 @@ export async function createListing(req, res) {
 
 export async function getActiveListings(req, res) {
   try {
-    const { category_id, limit, offset } = req.query;
+    const { search, category_id, price_min, price_max, condition, limit, offset } = req.query;
     const listings = await listingService.getActiveListings({ 
-      category_id: category_id ? parseInt(category_id) : null, 
+      search: search || null,
+      category_id: category_id ? parseInt(category_id) : null,
+      price_min_cents: price_min ? parseInt(price_min) : null,
+      price_max_cents: price_max ? parseInt(price_max) : null,
+      condition: condition || null,
       limit: limit ? parseInt(limit) : 50, 
       offset: offset ? parseInt(offset) : 0 
     });

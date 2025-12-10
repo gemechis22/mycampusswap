@@ -33,7 +33,7 @@ export const authAPI = {
 
 export const listingsAPI = {
   // Public - browse all active listings
-  getActive: () => api.get('/listings'),
+  getActive: (filters = {}) => api.get('/listings', { params: filters }),
   
   // Student - create listing (requires auth)
   create: (listingData) => api.post('/listings', listingData),
