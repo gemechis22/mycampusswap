@@ -163,7 +163,7 @@ const Browse = () => {
 
       {showFilters && (
         <div className="filters-card">
-        <div className="filters-row">
+          <div className="filters-row">
           <div className="filter-field">
             <label>Category</label>
             <select
