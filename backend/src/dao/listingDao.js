@@ -1,9 +1,9 @@
 import { query } from '../config/db.js';
 
-export async function createListing({ seller_id, category_id, title, description, price_cents, condition, quantity }) {
-  const text = `INSERT INTO listing (seller_id, category_id, title, description, price_cents, condition, quantity, status)
-               VALUES ($1,$2,$3,$4,$5,$6,$7,'pending') RETURNING *`;
-  const values = [seller_id, category_id, title, description, price_cents, condition || 'unknown', quantity || 1];
+export async function createListing({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url }) {
+  const text = `INSERT INTO listing (seller_id, category_id, title, description, price_cents, condition, quantity, image_url, status)
+               VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'pending') RETURNING *`;
+  const values = [seller_id, category_id, title, description, price_cents, condition || 'unknown', quantity || 1, image_url || null];
   const { rows } = await query(text, values);
   return rows[0];
 }

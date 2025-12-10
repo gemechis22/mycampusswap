@@ -4,7 +4,26 @@ export async function createListing(req, res) {
   try {
     const { category_id, title, description, price_cents, condition, quantity } = req.body;
     const seller_id = req.user.id;
-    const listing = await listingService.createListingForStudent({ seller_id, category_id, title, description, price_cents, condition, quantity });
+    
+    // Handle image upload if provided
+    let image_url = null;
+    if (req.file) {
+      // Convert buffer to base64 and create data URL for now
+      // In production, use cloud storage like S3, Cloudinary, etc.
+      const base64 = req.file.buffer.toString('base64');
+      image_url = `data:${req.file.mimetype};base64,${base64}`;
+    }
+    
+    const listing = await listingService.createListingForStudent({ 
+      seller_id, 
+      category_id, 
+      title, 
+      description, 
+      price_cents, 
+      condition, 
+      quantity,
+      image_url
+    });
     res.status(201).json({ listing });
   } catch (err) {
     res.status(400).json({ error: err.message });

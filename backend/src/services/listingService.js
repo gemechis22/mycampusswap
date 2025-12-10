@@ -1,10 +1,10 @@
 import * as listingDao from '../dao/listingDao.js';
 
-export async function createListingForStudent({ seller_id, category_id, title, description, price_cents, condition, quantity }) {
+export async function createListingForStudent({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url }) {
   if (!title || price_cents == null || price_cents < 0) {
     throw new Error('Invalid listing data');
   }
-  const listing = await listingDao.createListing({ seller_id, category_id, title, description, price_cents, condition, quantity });
+  const listing = await listingDao.createListing({ seller_id, category_id, title, description, price_cents, condition, quantity, image_url });
   return listing;
 }
 

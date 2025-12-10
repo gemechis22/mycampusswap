@@ -36,7 +36,17 @@ export const listingsAPI = {
   getActive: (filters = {}) => api.get('/listings', { params: filters }),
   
   // Student - create listing (requires auth)
-  create: (listingData) => api.post('/listings', listingData),
+  // Supports both JSON and FormData (for file uploads)
+  create: (listingData) => {
+    if (listingData instanceof FormData) {
+      return api.post('/listings', listingData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+    }
+    return api.post('/listings', listingData);
+  },
   
   // Student - get my listings (requires auth)
   getMy: () => api.get('/listings/my'),

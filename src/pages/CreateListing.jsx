@@ -10,6 +10,8 @@ const CreateListing = () => {
   const [price, setPrice] = useState('');
   const [categoryId, setCategoryId] = useState('1');
   const [condition, setCondition] = useState('good');
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -52,14 +54,21 @@ const CreateListing = () => {
     }
 
     try {
-      await listingsAPI.create({
-        title,
-        description,
-        price_cents: Math.round(parseFloat(price) * 100), // Convert dollars to cents
-        category_id: parseInt(categoryId),
-        condition: condition,
-        quantity: 1, // Default quantity
-      });
+      // Use FormData to send file + other data
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('price_cents', Math.round(parseFloat(price) * 100));
+      formData.append('category_id', parseInt(categoryId));
+      formData.append('condition', condition);
+      formData.append('quantity', 1);
+      
+      if (image) {
+        formData.append('image', image);
+      }
+
+      // Create listing with FormData
+      await listingsAPI.create(formData);
 
       setSuccess(true);
       
@@ -69,6 +78,8 @@ const CreateListing = () => {
       setPrice('');
       setCategoryId('1');
       setCondition('good');
+      setImage(null);
+      setImagePreview(null);
 
       // Redirect after 2 seconds
       setTimeout(() => {
@@ -78,6 +89,26 @@ const CreateListing = () => {
       setError(err.response?.data?.error || 'Failed to create listing');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image must be less than 5MB');
+        return;
+      }
+      setImage(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+      setError('');
     }
   };
 
@@ -157,6 +188,32 @@ const CreateListing = () => {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="form-group">
+            <label>Image</label>
+            {imagePreview && (
+              <div className="image-preview">
+                <img src={imagePreview} alt="Preview" />
+                <button 
+                  type="button" 
+                  className="btn-remove-image"
+                  onClick={() => {
+                    setImage(null);
+                    setImagePreview(null);
+                  }}
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              disabled={loading}
+            />
+            <small>Max file size: 5MB. Supported: JPG, PNG, GIF</small>
           </div>
 
           <div className="form-group">
