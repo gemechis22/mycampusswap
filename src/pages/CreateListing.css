@@ -69,6 +69,19 @@
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   background: #f5f5f5;
+  cursor: grab;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 3px solid transparent;
+}
+
+.image-thumbnail:active {
+  cursor: grabbing;
+  opacity: 0.8;
+}
+
+.image-thumbnail.is-cover {
+  border-color: #E31837;
+  box-shadow: 0 0 0 2px #E31837, 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .image-thumbnail img {
@@ -77,10 +90,74 @@
   object-fit: cover;
 }
 
-.btn-remove-thumbnail {
+.cover-badge {
   position: absolute;
   top: 4px;
-  right: 4px;
+  left: 4px;
+  background: #E31837;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  z-index: 5;
+}
+
+.image-position {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.image-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  padding: 4px;
+  flex-wrap: wrap;
+}
+
+.image-thumbnail:hover .image-actions {
+  opacity: 1;
+}
+
+.btn-set-cover {
+  padding: 4px 8px;
+  background: #FFC107;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-set-cover:hover {
+  background: #FFB300;
+}
+
+.btn-remove-thumbnail {
   width: 28px;
   height: 28px;
   padding: 0;
@@ -113,6 +190,27 @@
   border-radius: 8px;
   margin-bottom: 20px;
   text-align: center;
+  font-weight: 600;
+}
+
+.upload-progress {
+  width: 100%;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  transition: width 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: white;
   font-weight: 600;
 }
 

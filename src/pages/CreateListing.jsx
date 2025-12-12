@@ -14,6 +14,8 @@ const CreateListing = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [draggedImage, setDraggedImage] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -41,11 +43,69 @@ const CreateListing = () => {
     }
   }, [isAuthenticated, authLoading, navigate]);
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (images.length + files.length > MAX_IMAGES) {
+      setError(`Maximum ${MAX_IMAGES} images allowed`);
+      return;
+    }
+
+    const newImages = files.map((file, idx) => ({
+      id: Date.now() + idx,
+      file,
+      preview: URL.createObjectURL(file),
+      isCover: images.length === 0 && idx === 0, // First image is cover by default
+    }));
+
+    setImages([...images, ...newImages]);
+    setError('');
+  };
+
+  const removeImage = (id) => {
+    const updated = images.filter(img => img.id !== id);
+    // If we removed the cover, make the first remaining image the cover
+    if (updated.length > 0 && !updated.some(img => img.isCover)) {
+      updated[0].isCover = true;
+    }
+    setImages(updated);
+  };
+
+  const setCoverImage = (id) => {
+    const updated = images.map(img => ({
+      ...img,
+      isCover: img.id === id,
+    }));
+    setImages(updated);
+  };
+
+  const handleDragStart = (id) => {
+    setDraggedImage(id);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetId) => {
+    if (!draggedImage || draggedImage === targetId) return;
+
+    const draggedIdx = images.findIndex(img => img.id === draggedImage);
+    const targetIdx = images.findIndex(img => img.id === targetId);
+
+    const reordered = [...images];
+    const [draggedItem] = reordered.splice(draggedIdx, 1);
+    reordered.splice(targetIdx, 0, draggedItem);
+
+    setImages(reordered);
+    setDraggedImage(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
     setLoading(true);
+    setUploadProgress(0);
 
     // Validation
     if (parseFloat(price) <= 0) {
@@ -64,9 +124,11 @@ const CreateListing = () => {
       formData.append('condition', condition);
       formData.append('quantity', 1);
       
-      // Add all images
-      images.forEach((imgObj) => {
+      // Add all images with cover marker and position
+      images.forEach((imgObj, idx) => {
         formData.append('images', imgObj.file);
+        formData.append(`imageCover_${idx}`, imgObj.isCover ? 'true' : 'false');
+        formData.append(`imagePosition_${idx}`, idx + 1);
       });
 
       // Create listing with FormData
@@ -78,6 +140,7 @@ const CreateListing = () => {
       setTitle('');
       setDescription('');
       setPrice('');
+
       setCategoryId('1');
       setCondition('good');
       setImages([]);
@@ -213,19 +276,48 @@ const CreateListing = () => {
           <div className="form-group">
             <label>Images (up to {MAX_IMAGES})</label>
             <div className="images-gallery">
-              {images.map((imgObj) => (
-                <div key={imgObj.id} className="image-thumbnail">
+              {images.map((imgObj, idx) => (
+                <div 
+                  key={imgObj.id} 
+                  className={`image-thumbnail ${imgObj.isCover ? 'is-cover' : ''}`}
+                  draggable
+                  onDragStart={() => handleDragStart(imgObj.id)}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(imgObj.id)}
+                >
+                  {imgObj.isCover && <div className="cover-badge">COVER</div>}
                   <img src={imgObj.preview} alt="Preview" />
-                  <button 
-                    type="button" 
-                    className="btn-remove-thumbnail"
-                    onClick={() => removeImage(imgObj.id)}
-                  >
-                    ✕
-                  </button>
+                  <div className="image-actions">
+                    {!imgObj.isCover && (
+                      <button 
+                        type="button" 
+                        className="btn-set-cover"
+                        onClick={() => setCoverImage(imgObj.id)}
+                        title="Set as cover image"
+                      >
+                        ⭐ Set Cover
+                      </button>
+                    )}
+                    <button 
+                      type="button" 
+                      className="btn-remove-thumbnail"
+                      onClick={() => removeImage(imgObj.id)}
+                      title="Remove image"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="image-position">{idx + 1}</div>
                 </div>
               ))}
             </div>
+            {uploadProgress > 0 && uploadProgress < 100 && (
+              <div className="upload-progress">
+                <div className="progress-bar" style={{ width: `${uploadProgress}%` }}>
+                  {uploadProgress}%
+                </div>
+              </div>
+            )}
             {images.length < MAX_IMAGES && (
               <>
                 <input
@@ -236,7 +328,7 @@ const CreateListing = () => {
                   disabled={loading}
                 />
                 <small>
-                  You can upload {MAX_IMAGES - images.length} more images. Max 5MB each.
+                  You can upload {MAX_IMAGES - images.length} more images. Max 5MB each. Drag to reorder.
                 </small>
               </>
             )}

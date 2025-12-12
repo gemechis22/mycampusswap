@@ -9,23 +9,41 @@ export async function createListing({ seller_id, category_id, title, description
 }
 
 export async function addListingImages(listing_id, images) {
-  // images = [{ data_url, display_order }, ...]
+  // images = [{ data_url, position, isCover }, ...]
   if (!images || images.length === 0) return;
   
   for (let i = 0; i < images.length; i++) {
-    const text = `INSERT INTO listing_image (listing_id, image_data, display_order)
-                  VALUES ($1, $2, $3)`;
-    const values = [listing_id, images[i].data_url, images[i].display_order || (i + 1)];
+    const isCover = images[i].isCover || (i === 0); // First image is cover by default
+    const text = `INSERT INTO listing_image (listing_id, url, position, is_cover)
+                  VALUES ($1, $2, $3, $4)`;
+    const values = [listing_id, images[i].data_url, images[i].position || (i + 1), isCover];
     await query(text, values);
   }
 }
 
 export async function getListingImages(listing_id) {
-  const text = `SELECT id, image_data, display_order FROM listing_image 
+  const text = `SELECT id, url, position, is_cover FROM listing_image 
                 WHERE listing_id = $1 
-                ORDER BY display_order ASC`;
+                ORDER BY is_cover DESC, position ASC`;
   const { rows } = await query(text, [listing_id]);
   return rows;
+}
+
+export async function setCoverImage(image_id, listing_id) {
+  // Set this image as cover, unset all others for this listing
+  const unsetText = `UPDATE listing_image SET is_cover = FALSE WHERE listing_id = $1`;
+  await query(unsetText, [listing_id]);
+  
+  const setText = `UPDATE listing_image SET is_cover = TRUE WHERE id = $1`;
+  await query(setText, [image_id]);
+}
+
+export async function reorderImages(listing_id, imageOrder) {
+  // imageOrder = [{ id, position }, ...]
+  for (const img of imageOrder) {
+    const text = `UPDATE listing_image SET position = $1 WHERE id = $2 AND listing_id = $3`;
+    await query(text, [img.position, img.id, listing_id]);
+  }
 }
 
 export async function deleteListingImage(image_id) {
